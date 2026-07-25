@@ -129,6 +129,11 @@
     font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--copper-bright);
     letter-spacing:1px;margin-bottom:10px;
   }
+  .section-title-big{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(26px,4vw,36px);font-weight:700;
+    color:var(--copper-bright);letter-spacing:-0.5px;margin-bottom:10px;
+  }
   .section-head h2{font-size:clamp(26px,4vw,36px);letter-spacing:-0.5px;}
   .section-head p{color:var(--muted);margin-top:12px;font-size:15.5px;}
 
@@ -214,6 +219,11 @@
     outline:none;border-color:var(--air);
   }
   .form-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-section-title{
+    font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;
+    color:var(--copper-bright);margin-bottom:16px;
+  }
+  .form-section-title.second{margin-top:8px;}
   .service-toggle{display:flex;gap:10px;margin-bottom:22px;}
   .service-toggle button{
     flex:1;padding:12px;border-radius:4px;border:1px solid var(--line);
@@ -292,31 +302,8 @@
 <section class="services">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">01 — Services</div>
-      <h2>Built for two kinds of jobs.</h2>
-      <p>Residential comfort and commercial systems need different intake, different timelines, and different crews. We book them separately so nothing gets lost.</p>
-    </div>
-    <div class="service-grid">
-      <div class="service-card">
-        <div class="service-tag">Residential</div>
-        <h3>Homes &amp; single units</h3>
-        <ul>
-          <li><span>New system installation</span></li>
-          <li><span>AC / furnace replacement</span></li>
-          <li><span>Repair &amp; service calls</span></li>
-          <li><span>Seasonal maintenance</span></li>
-        </ul>
-      </div>
-      <div class="service-card">
-        <div class="service-tag">Commercial</div>
-        <h3>Buildings &amp; multi-zone</h3>
-        <ul>
-          <li><span>Rooftop unit install/replace</span></li>
-          <li><span>Multi-zone system design</span></li>
-          <li><span>Facilities service contracts</span></li>
-          <li><span>Emergency repair</span></li>
-        </ul>
-      </div>
+      <div class="section-title-big">Services</div>
+      <p>Residential and commercial systems.</p>
     </div>
   </div>
 </section>
@@ -324,41 +311,12 @@
 <section id="estimate">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">02 — Estimate</div>
-      <h2>Start with a few photos, not a guess.</h2>
-      <p>Answer a handful of questions about your space and current system, then upload photos of the unit, attic or roof access, and electrical panel. We'll follow up with a real quote or schedule an in-person visit for anything that needs it.</p>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-index mono">01</div>
-        <div class="step-body">
-          <h4>Tell us about the space</h4>
-          <p>Square footage, home or building age, current system type.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-index mono">02</div>
-        <div class="step-body">
-          <h4>Upload photos or a short video</h4>
-          <p>Existing unit, access points, and electrical panel. Video capped at 60 seconds / 100MB.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-index mono">03</div>
-        <div class="step-body">
-          <h4>Get a quote or a scheduled visit</h4>
-          <p>Straightforward jobs get a fast estimate. Anything complex gets an in-person walkthrough.</p>
-        </div>
-      </div>
+      <div class="section-title-big">Estimate</div>
+      <p>Answer a few questions about your space and current system, then upload photos of the unit, attic or roof access, and electrical panel. We'll follow up with a real quote or schedule an in-person visit for anything that needs it.</p>
     </div>
 
     <form class="estimate-form" id="estimateForm">
-      <div class="service-toggle">
-        <button type="button" class="toggle-btn active" data-value="Residential">Residential</button>
-        <button type="button" class="toggle-btn" data-value="Commercial">Commercial</button>
-      </div>
-      <input type="hidden" id="serviceType" value="Residential">
-
+      <div class="form-section-title">Tell us about yourself</div>
       <div class="form-row">
         <label for="customerName">Full name</label>
         <input type="text" id="customerName" required>
@@ -373,6 +331,14 @@
           <input type="email" id="customerEmail" required>
         </div>
       </div>
+
+      <div class="form-section-title second">Tell us about your space</div>
+      <div class="service-toggle">
+        <button type="button" class="toggle-btn active" data-value="Residential">Residential</button>
+        <button type="button" class="toggle-btn" data-value="Commercial">Commercial</button>
+      </div>
+      <input type="hidden" id="serviceType" value="Residential">
+
       <div class="form-row">
         <label for="address">Property address</label>
         <input type="text" id="address" required>
@@ -394,6 +360,30 @@
       <div class="form-row">
         <label for="notes">Notes</label>
         <textarea id="notes" placeholder="Anything else we should know"></textarea>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-index mono">01</div>
+          <div class="step-body">
+            <h4>Tell us about the space</h4>
+            <p>Square footage, home or building age, current system type.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-index mono">02</div>
+          <div class="step-body">
+            <h4>Upload photos or a short video</h4>
+            <p>Existing unit, access points, and electrical panel. Video capped at 60 seconds / 100MB.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-index mono">03</div>
+          <div class="step-body">
+            <h4>Get a quote or a scheduled visit</h4>
+            <p>Straightforward jobs get a fast estimate. Anything complex gets an in-person walkthrough.</p>
+          </div>
+        </div>
       </div>
 
       <div class="form-row">
