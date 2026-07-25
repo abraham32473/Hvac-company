@@ -188,6 +188,64 @@
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto;}
   }
+
+  /* Estimate form */
+  .estimate-form{
+    margin-top:44px;max-width:640px;
+    border:1px solid var(--line);border-radius:6px;
+    background:var(--panel);padding:28px;
+  }
+  .form-row{margin-bottom:18px;}
+  .form-row label{
+    display:block;font-size:13px;color:var(--muted);margin-bottom:7px;
+    font-family:'IBM Plex Mono',monospace;letter-spacing:0.3px;
+  }
+  .form-row input[type="text"],
+  .form-row input[type="tel"],
+  .form-row input[type="email"],
+  .form-row select,
+  .form-row textarea{
+    width:100%;background:var(--ink);border:1px solid var(--line);
+    color:var(--text);padding:12px 14px;border-radius:4px;
+    font-family:'Inter',sans-serif;font-size:15px;
+  }
+  .form-row textarea{resize:vertical;min-height:80px;}
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+    outline:none;border-color:var(--air);
+  }
+  .form-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .service-toggle{display:flex;gap:10px;margin-bottom:22px;}
+  .service-toggle button{
+    flex:1;padding:12px;border-radius:4px;border:1px solid var(--line);
+    background:var(--ink);color:var(--muted);font-weight:600;font-size:14px;
+    font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.15s ease;
+  }
+  .service-toggle button.active{
+    border-color:var(--copper);color:var(--copper-bright);background:rgba(201,122,61,0.08);
+  }
+  .file-drop{
+    border:1px dashed var(--line);border-radius:4px;padding:18px;
+    text-align:center;cursor:pointer;color:var(--muted);font-size:13.5px;
+  }
+  .file-drop:hover{border-color:var(--air);}
+  .file-list{margin-top:10px;font-size:12.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .file-list div{padding:4px 0;}
+  .form-hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  .form-submit{
+    width:100%;background:var(--air);color:var(--ink);border:none;
+    padding:15px;border-radius:4px;font-weight:600;font-size:15px;
+    font-family:'Inter',sans-serif;cursor:pointer;margin-top:6px;
+  }
+  .form-submit:disabled{opacity:0.5;cursor:not-allowed;}
+  .form-status{margin-top:14px;font-size:14px;padding:12px;border-radius:4px;display:none;}
+  .form-status.show{display:block;}
+  .form-status.success{background:rgba(111,168,201,0.12);color:var(--air);border:1px solid var(--air);}
+  .form-status.error{background:rgba(201,122,61,0.12);color:var(--copper-bright);border:1px solid var(--copper);}
+
+  @media (max-width:680px){
+    .form-two-col{grid-template-columns:1fr;}
+    .estimate-form{padding:20px;}
+  }
 </style>
 </head>
 <body>
@@ -282,7 +340,7 @@
         <div class="step-index mono">02</div>
         <div class="step-body">
           <h4>Upload photos or a short video</h4>
-          <p>Existing unit, access points, and electrical panel.</p>
+          <p>Existing unit, access points, and electrical panel. Video capped at 60 seconds / 100MB.</p>
         </div>
       </div>
       <div class="step">
@@ -293,6 +351,68 @@
         </div>
       </div>
     </div>
+
+    <form class="estimate-form" id="estimateForm">
+      <div class="service-toggle">
+        <button type="button" class="toggle-btn active" data-value="Residential">Residential</button>
+        <button type="button" class="toggle-btn" data-value="Commercial">Commercial</button>
+      </div>
+      <input type="hidden" id="serviceType" value="Residential">
+
+      <div class="form-row">
+        <label for="customerName">Full name</label>
+        <input type="text" id="customerName" required>
+      </div>
+      <div class="form-two-col">
+        <div class="form-row">
+          <label for="customerPhone">Phone</label>
+          <input type="tel" id="customerPhone" required>
+        </div>
+        <div class="form-row">
+          <label for="customerEmail">Email</label>
+          <input type="email" id="customerEmail" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="address">Property address</label>
+        <input type="text" id="address" required>
+      </div>
+      <div class="form-two-col">
+        <div class="form-row">
+          <label for="squareFootage">Square footage</label>
+          <input type="text" id="squareFootage" placeholder="e.g. 1800">
+        </div>
+        <div class="form-row">
+          <label for="homeAge">Home / building age</label>
+          <input type="text" id="homeAge" placeholder="e.g. 15 years">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="systemType">Current system type</label>
+        <input type="text" id="systemType" placeholder="e.g. central AC, split unit, none">
+      </div>
+      <div class="form-row">
+        <label for="notes">Notes</label>
+        <textarea id="notes" placeholder="Anything else we should know"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Photos (up to 8, 15MB each)</label>
+        <div class="file-drop" id="photoDrop">Tap to choose photos</div>
+        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+        <div class="file-list" id="photoList"></div>
+      </div>
+
+      <div class="form-row">
+        <label>Video (optional — max 60 sec, 100MB)</label>
+        <div class="file-drop" id="videoDrop">Tap to choose a video</div>
+        <input type="file" id="videoInput" accept="video/*" hidden>
+        <div class="file-list" id="videoList"></div>
+      </div>
+
+      <button type="submit" class="form-submit" id="submitBtn">Submit estimate request</button>
+      <div class="form-status" id="formStatus"></div>
+    </form>
   </div>
 </section>
 
@@ -307,5 +427,166 @@
   <div class="footer-license mono">© 2026 Denali Air Cooling and Heat</div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const SUPABASE_URL = "https://dgwmsvknrlzrdkbsecnc.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_FIuJPyIANJa4n1aPL1dBaA_RwivPQt9";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const MAX_PHOTOS = 8;
+  const MAX_PHOTO_MB = 15;
+  const MAX_VIDEO_MB = 100;
+  const MAX_VIDEO_SECONDS = 60;
+
+  let serviceType = "Residential";
+  let photoFiles = [];
+  let videoFile = null;
+
+  // Service toggle
+  document.querySelectorAll(".toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      serviceType = btn.dataset.value;
+      document.getElementById("serviceType").value = serviceType;
+    });
+  });
+
+  // Photo picker
+  const photoDrop = document.getElementById("photoDrop");
+  const photoInput = document.getElementById("photoInput");
+  const photoList = document.getElementById("photoList");
+  photoDrop.addEventListener("click", () => photoInput.click());
+  photoInput.addEventListener("change", () => {
+    const chosen = Array.from(photoInput.files);
+    const tooBig = chosen.filter(f => f.size > MAX_PHOTO_MB * 1024 * 1024);
+    if (tooBig.length) {
+      showStatus(`One or more photos exceed ${MAX_PHOTO_MB}MB and were skipped.`, "error");
+    }
+    const valid = chosen.filter(f => f.size <= MAX_PHOTO_MB * 1024 * 1024);
+    photoFiles = valid.slice(0, MAX_PHOTOS);
+    if (chosen.length > MAX_PHOTOS) {
+      showStatus(`Only the first ${MAX_PHOTOS} photos were kept.`, "error");
+    }
+    photoList.innerHTML = photoFiles.map(f => `<div>${f.name}</div>`).join("");
+  });
+
+  // Video picker with duration + size check
+  const videoDrop = document.getElementById("videoDrop");
+  const videoInput = document.getElementById("videoInput");
+  const videoList = document.getElementById("videoList");
+  videoDrop.addEventListener("click", () => videoInput.click());
+  videoInput.addEventListener("change", () => {
+    const file = videoInput.files[0];
+    if (!file) return;
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      showStatus(`Video exceeds ${MAX_VIDEO_MB}MB. Please choose a shorter clip.`, "error");
+      videoInput.value = "";
+      videoFile = null;
+      videoList.innerHTML = "";
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const tempVideo = document.createElement("video");
+    tempVideo.preload = "metadata";
+    tempVideo.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      if (tempVideo.duration > MAX_VIDEO_SECONDS) {
+        showStatus(`Video is longer than ${MAX_VIDEO_SECONDS} seconds. Please choose a shorter clip.`, "error");
+        videoInput.value = "";
+        videoFile = null;
+        videoList.innerHTML = "";
+      } else {
+        videoFile = file;
+        videoList.innerHTML = `<div>${file.name}</div>`;
+      }
+    };
+    tempVideo.src = url;
+  });
+
+  function showStatus(msg, type){
+    const el = document.getElementById("formStatus");
+    el.textContent = msg;
+    el.className = `form-status show ${type}`;
+  }
+
+  async function uploadFile(file, folder){
+    const ext = file.name.split(".").pop();
+    const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("estimate-uploads").upload(path, file);
+    if (error) throw error;
+    const { data } = supabase.storage.from("estimate-uploads").getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  document.getElementById("estimateForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+    showStatus("Uploading your photos and info...", "success");
+
+    try {
+      const folder = crypto.randomUUID();
+      const photoUrls = [];
+      for (const file of photoFiles) {
+        photoUrls.push(await uploadFile(file, folder));
+      }
+      let videoUrl = null;
+      if (videoFile) {
+        videoUrl = await uploadFile(videoFile, folder);
+      }
+
+      const payload = {
+        service_type: serviceType,
+        customer_name: document.getElementById("customerName").value,
+        customer_phone: document.getElementById("customerPhone").value,
+        customer_email: document.getElementById("customerEmail").value,
+        address: document.getElementById("address").value,
+        square_footage: document.getElementById("squareFootage").value,
+        home_age: document.getElementById("homeAge").value,
+        system_type: document.getElementById("systemType").value,
+        notes: document.getElementById("notes").value,
+        photo_urls: photoUrls,
+        video_url: videoUrl
+      };
+
+      const { error: insertError } = await supabase.from("estimate_requests").insert(payload);
+      if (insertError) throw insertError;
+
+      const { error: fnError } = await supabase.functions.invoke("send-estimate-email", {
+        body: {
+          serviceType: payload.service_type,
+          customerName: payload.customer_name,
+          customerPhone: payload.customer_phone,
+          customerEmail: payload.customer_email,
+          address: payload.address,
+          squareFootage: payload.square_footage,
+          homeAge: payload.home_age,
+          systemType: payload.system_type,
+          notes: payload.notes,
+          photoUrls: photoUrls,
+          videoUrl: videoUrl
+        }
+      });
+      if (fnError) console.error("Email send failed:", fnError);
+
+      showStatus("Request submitted — we'll follow up shortly.", "success");
+      document.getElementById("estimateForm").reset();
+      photoFiles = [];
+      videoFile = null;
+      photoList.innerHTML = "";
+      videoList.innerHTML = "";
+    } catch (err) {
+      console.error(err);
+      showStatus("Something went wrong submitting your request. Please try again or call us directly.", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit estimate request";
+    }
+  });
+})();
+</script>
 </body>
 </html>
