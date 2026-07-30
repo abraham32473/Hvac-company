@@ -563,7 +563,8 @@
       videoList.innerHTML = "";
     } catch (err) {
       console.error(err);
-      showStatus("Something went wrong submitting your request. Please try again or call us directly.", "error");
+      const detail = (err && (err.message || err.error_description || JSON.stringify(err))) || "Unknown error";
+      showStatus("Error: " + detail, "error");
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit estimate request";
