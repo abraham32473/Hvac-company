@@ -242,6 +242,21 @@
     border:1px solid var(--air);background:rgba(111,168,201,0.12);
     color:var(--air);font-weight:600;
   }
+  .slots-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;
+  }
+  .slot-btn{
+    padding:14px 10px;border-radius:4px;border:1px solid var(--line);
+    background:var(--ink);color:var(--text);font-weight:600;font-size:14px;
+    font-family:'Inter',sans-serif;cursor:pointer;text-align:center;
+  }
+  .slot-btn:hover{border-color:var(--air);}
+  .slot-btn.selected{
+    border-color:var(--air);background:rgba(111,168,201,0.15);color:var(--air);
+  }
+  @media (max-width:420px){
+    .slots-grid{grid-template-columns:1fr;}
+  }
   .file-list{margin-top:10px;font-size:12.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
   .file-list div{padding:4px 0;}
   .form-hint{font-size:12px;color:var(--muted);margin-top:6px;}
@@ -399,11 +414,60 @@
   </div>
 </section>
 
-<div class="cta-band" id="book">
-  <h2>Ready to get on the schedule?</h2>
-  <p>Booking takes about two minutes.</p>
-  <a href="#" class="btn-primary">Book an appointment</a>
-</div>
+<section id="book">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-title-big">Book</div>
+      <p>Pick a service type and a date to see open times. Appointments run 2 hours, Monday–Saturday, 8am–6pm.</p>
+    </div>
+
+    <form class="estimate-form" id="bookingForm">
+      <div class="service-toggle">
+        <button type="button" class="toggle-btn active" data-value="Estimate">Estimate</button>
+        <button type="button" class="toggle-btn" data-value="Service Call">Service Call</button>
+      </div>
+      <input type="hidden" id="appointmentType" value="Estimate">
+
+      <div class="form-row">
+        <label for="bookingDate">Date</label>
+        <input type="date" id="bookingDate" required>
+      </div>
+
+      <div class="form-row" id="slotsRow" style="display:none;">
+        <label>Available times</label>
+        <div id="slotsList" class="slots-grid"></div>
+        <div id="slotsEmpty" class="form-hint" style="display:none;">No open times that day — try another date.</div>
+      </div>
+
+      <div id="bookingDetails" style="display:none;">
+        <div class="form-row">
+          <label for="bookName">Full name</label>
+          <input type="text" id="bookName" required>
+        </div>
+        <div class="form-two-col">
+          <div class="form-row">
+            <label for="bookPhone">Phone</label>
+            <input type="tel" id="bookPhone" required>
+          </div>
+          <div class="form-row">
+            <label for="bookEmail">Email</label>
+            <input type="email" id="bookEmail" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="bookAddress">Property address</label>
+          <input type="text" id="bookAddress" required>
+        </div>
+        <div class="form-row">
+          <label for="bookNotes">Notes</label>
+          <textarea id="bookNotes" placeholder="Anything else we should know"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="bookSubmitBtn">Confirm appointment</button>
+      </div>
+      <div class="form-status" id="bookStatus"></div>
+    </form>
+  </div>
+</section>
 
 <footer>
   <div class="footer-license mono">CA Contractor License #888780 · C-20 HVAC</div>
@@ -568,6 +632,165 @@
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit estimate request";
+    }
+  });
+
+  // ---------- Booking calendar ----------
+  const OPEN_HOUR = 8;
+  const CLOSE_HOUR = 18;
+  const SLOT_HOURS = 2;
+
+  let appointmentType = "Estimate";
+  let selectedSlot = null;
+
+  document.querySelectorAll("#bookingForm .toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#bookingForm .toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      appointmentType = btn.dataset.value;
+      document.getElementById("appointmentType").value = appointmentType;
+      const dateInput = document.getElementById("bookingDate");
+      if (dateInput.value) loadSlots(dateInput.value);
+    });
+  });
+
+  const bookingDateInput = document.getElementById("bookingDate");
+  const todayStr = new Date().toISOString().split("T")[0];
+  bookingDateInput.min = todayStr;
+  bookingDateInput.addEventListener("change", () => {
+    selectedSlot = null;
+    document.getElementById("bookingDetails").style.display = "none";
+    const dateVal = bookingDateInput.value;
+    if (!dateVal) return;
+    const dayOfWeek = new Date(dateVal + "T00:00:00").getDay();
+    if (dayOfWeek === 0) {
+      document.getElementById("slotsRow").style.display = "block";
+      document.getElementById("slotsList").innerHTML = "";
+      document.getElementById("slotsEmpty").style.display = "block";
+      document.getElementById("slotsEmpty").textContent = "Closed Sundays — please pick another date.";
+      return;
+    }
+    loadSlots(dateVal);
+  });
+
+  async function loadSlots(dateVal){
+    const slotsRow = document.getElementById("slotsRow");
+    const slotsList = document.getElementById("slotsList");
+    const slotsEmpty = document.getElementById("slotsEmpty");
+    slotsRow.style.display = "block";
+    slotsList.innerHTML = "";
+    slotsEmpty.style.display = "none";
+
+    const dayStart = new Date(dateVal + "T00:00:00");
+    const dayEnd = new Date(dateVal + "T23:59:59");
+
+    const { data: existing, error } = await supabase
+      .from("appointments")
+      .select("start_time")
+      .eq("status", "confirmed")
+      .gte("start_time", dayStart.toISOString())
+      .lte("start_time", dayEnd.toISOString());
+
+    if (error) {
+      console.error(error);
+      slotsEmpty.style.display = "block";
+      slotsEmpty.textContent = "Couldn't load times — please try again.";
+      return;
+    }
+
+    const bookedHours = new Set((existing || []).map(row => new Date(row.start_time).getHours()));
+    const isToday = dateVal === todayStr;
+    const nowHour = new Date().getHours();
+
+    let anyAvailable = false;
+    for (let hour = OPEN_HOUR; hour + SLOT_HOURS <= CLOSE_HOUR; hour += SLOT_HOURS) {
+      if (bookedHours.has(hour)) continue;
+      if (isToday && hour <= nowHour) continue;
+      anyAvailable = true;
+      const slotStart = new Date(dateVal + "T00:00:00");
+      slotStart.setHours(hour, 0, 0, 0);
+      const slotEnd = new Date(slotStart);
+      slotEnd.setHours(hour + SLOT_HOURS);
+
+      const label = `${formatHour(hour)} – ${formatHour(hour + SLOT_HOURS)}`;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn";
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedSlot = { start: slotStart, end: slotEnd };
+        document.getElementById("bookingDetails").style.display = "block";
+      });
+      slotsList.appendChild(btn);
+    }
+
+    if (!anyAvailable) {
+      slotsEmpty.style.display = "block";
+      slotsEmpty.textContent = "No open times that day — try another date.";
+    }
+  }
+
+  function formatHour(hour){
+    const period = hour >= 12 ? "PM" : "AM";
+    let h = hour % 12;
+    if (h === 0) h = 12;
+    return `${h}:00 ${period}`;
+  }
+
+  document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!selectedSlot) return;
+    const submitBtn = document.getElementById("bookSubmitBtn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Booking...";
+    const statusEl = document.getElementById("bookStatus");
+    statusEl.className = "form-status";
+
+    try {
+      const payload = {
+        appointment_type: appointmentType,
+        start_time: selectedSlot.start.toISOString(),
+        end_time: selectedSlot.end.toISOString(),
+        customer_name: document.getElementById("bookName").value,
+        customer_phone: document.getElementById("bookPhone").value,
+        customer_email: document.getElementById("bookEmail").value,
+        address: document.getElementById("bookAddress").value,
+        notes: document.getElementById("bookNotes").value
+      };
+
+      const { error: insertError } = await supabase.from("appointments").insert(payload);
+      if (insertError) throw insertError;
+
+      const { error: fnError } = await supabase.functions.invoke("send-appointment-email", {
+        body: {
+          appointmentType: payload.appointment_type,
+          startTime: payload.start_time,
+          endTime: payload.end_time,
+          customerName: payload.customer_name,
+          customerPhone: payload.customer_phone,
+          customerEmail: payload.customer_email,
+          address: payload.address,
+          notes: payload.notes
+        }
+      });
+      if (fnError) console.error("Email send failed:", fnError);
+
+      statusEl.textContent = "Appointment confirmed — we'll see you then!";
+      statusEl.className = "form-status show success";
+      document.getElementById("bookingForm").reset();
+      document.getElementById("slotsRow").style.display = "none";
+      document.getElementById("bookingDetails").style.display = "none";
+      selectedSlot = null;
+    } catch (err) {
+      console.error(err);
+      const detail = (err && (err.message || err.error_description || JSON.stringify(err))) || "Unknown error";
+      statusEl.textContent = "Error: " + detail;
+      statusEl.className = "form-status show error";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Confirm appointment";
     }
   });
 })();
