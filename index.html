@@ -417,8 +417,8 @@
 <section id="book">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-title-big">Book</div>
-      <p>Pick a service type and a date to see open times. Appointments run 2 hours, Monday–Saturday, 8am–6pm.</p>
+      <div class="section-title-big">Appointments</div>
+      <p>Pick a service type and a date to see open times. Appointments are available Monday–Saturday, 8am–6pm.</p>
     </div>
 
     <form class="estimate-form" id="bookingForm">
@@ -636,9 +636,8 @@
   });
 
   // ---------- Booking calendar ----------
-  const OPEN_HOUR = 8;
-  const CLOSE_HOUR = 18;
-  const SLOT_HOURS = 2;
+  const SLOT_START_HOURS = [9, 10, 12, 14, 16, 17]; // 9am, 10am, 12pm, 2pm, 4pm, 5pm
+  const SLOT_DURATION_HOURS = 2; // internal buffer per job, not shown to customer
 
   let appointmentType = "Estimate";
   let selectedSlot = null;
@@ -686,7 +685,7 @@
 
     const { data: existing, error } = await supabase
       .from("appointments")
-      .select("start_time")
+      .select("start_time, end_time")
       .eq("status", "confirmed")
       .gte("start_time", dayStart.toISOString())
       .lte("start_time", dayEnd.toISOString());
@@ -698,21 +697,27 @@
       return;
     }
 
-    const bookedHours = new Set((existing || []).map(row => new Date(row.start_time).getHours()));
+    const existingRanges = (existing || []).map(row => ({
+      start: new Date(row.start_time),
+      end: new Date(row.end_time)
+    }));
     const isToday = dateVal === todayStr;
-    const nowHour = new Date().getHours();
+    const now = new Date();
 
     let anyAvailable = false;
-    for (let hour = OPEN_HOUR; hour + SLOT_HOURS <= CLOSE_HOUR; hour += SLOT_HOURS) {
-      if (bookedHours.has(hour)) continue;
-      if (isToday && hour <= nowHour) continue;
-      anyAvailable = true;
+    for (const hour of SLOT_START_HOURS) {
       const slotStart = new Date(dateVal + "T00:00:00");
       slotStart.setHours(hour, 0, 0, 0);
       const slotEnd = new Date(slotStart);
-      slotEnd.setHours(hour + SLOT_HOURS);
+      slotEnd.setHours(hour + SLOT_DURATION_HOURS);
 
-      const label = `${formatHour(hour)} – ${formatHour(hour + SLOT_HOURS)}`;
+      if (isToday && slotStart <= now) continue;
+
+      const overlaps = existingRanges.some(r => r.start < slotEnd && slotStart < r.end);
+      if (overlaps) continue;
+
+      anyAvailable = true;
+      const label = formatHour(hour);
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "slot-btn";
