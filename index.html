@@ -655,7 +655,10 @@
 
   const bookingDateInput = document.getElementById("bookingDate");
   const todayStr = new Date().toISOString().split("T")[0];
-  bookingDateInput.min = todayStr;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+  bookingDateInput.min = tomorrowStr;
   bookingDateInput.addEventListener("change", () => {
     selectedSlot = null;
     document.getElementById("bookingDetails").style.display = "none";
