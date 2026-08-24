@@ -12,15 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#12181F;
-    --panel:#1B242E;
-    --panel-2:#212C38;
-    --line:#324152;
-    --copper:#C97A3D;
-    --copper-bright:#E0925A;
-    --air:#6FA8C9;
-    --text:#EDEEF0;
-    --muted:#8B95A1;
+    --ink:#FFFFFF;
+    --panel:#F5F6F8;
+    --panel-2:#ECEFF2;
+    --line:#DCE1E6;
+    --copper:#1F5C82;
+    --copper-bright:#2E7CAD;
+    --air:#2E86AB;
+    --air-bright:#4AA3C9;
+    --text:#161B22;
+    --muted:#5B6470;
+    --error:#B3261E;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -41,7 +43,7 @@
   /* Header */
   header{
     position:sticky;top:0;z-index:50;
-    background:rgba(18,24,31,0.9);
+    background:rgba(255,255,255,0.92);
     backdrop-filter:blur(8px);
     border-bottom:1px solid var(--line);
   }
@@ -231,7 +233,7 @@
     font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.15s ease;
   }
   .service-toggle button.active{
-    border-color:var(--copper);color:var(--copper-bright);background:rgba(201,122,61,0.08);
+    border-color:var(--copper);color:var(--copper-bright);background:rgba(31,92,130,0.08);
   }
   .file-drop{
     border:1px dashed var(--line);border-radius:4px;padding:18px;
@@ -239,7 +241,7 @@
   }
   .file-drop:hover{border-color:var(--air);}
   .file-drop-highlight{
-    border:1px solid var(--air);background:rgba(111,168,201,0.12);
+    border:1px solid var(--air);background:rgba(46,134,171,0.10);
     color:var(--air);font-weight:600;
   }
   .slots-grid{
@@ -252,7 +254,7 @@
   }
   .slot-btn:hover{border-color:var(--air);}
   .slot-btn.selected{
-    border-color:var(--air);background:rgba(111,168,201,0.15);color:var(--air);
+    border-color:var(--air);background:rgba(46,134,171,0.14);color:var(--air);
   }
   @media (max-width:420px){
     .slots-grid{grid-template-columns:1fr;}
@@ -268,8 +270,8 @@
   .form-submit:disabled{opacity:0.5;cursor:not-allowed;}
   .form-status{margin-top:14px;font-size:14px;padding:12px;border-radius:4px;display:none;}
   .form-status.show{display:block;}
-  .form-status.success{background:rgba(111,168,201,0.12);color:var(--air);border:1px solid var(--air);}
-  .form-status.error{background:rgba(201,122,61,0.12);color:var(--copper-bright);border:1px solid var(--copper);}
+  .form-status.success{background:rgba(46,134,171,0.10);color:var(--air);border:1px solid var(--air);}
+  .form-status.error{background:rgba(179,38,30,0.08);color:var(--error);border:1px solid var(--error);}
 
   @media (max-width:680px){
     .form-two-col{grid-template-columns:1fr;}
@@ -283,8 +285,8 @@
   <div class="header-inner">
     <div class="logo">
       <svg class="logo-mark" viewBox="0 0 28 28" fill="none">
-        <circle cx="14" cy="14" r="12" stroke="#C97A3D" stroke-width="1.5"/>
-        <path d="M14 6 L14 14 L19 17" stroke="#6FA8C9" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="12" stroke="#1F5C82" stroke-width="1.5"/>
+        <path d="M14 6 L14 14 L19 17" stroke="#2E86AB" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       Denali Air Cooling and Heat
     </div>
